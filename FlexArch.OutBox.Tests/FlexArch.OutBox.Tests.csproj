@@ -25,6 +25,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\FlexArch.OutBox.Abstractions\FlexArch.OutBox.Abstractions.csproj" />
     <ProjectReference Include="..\FlexArch.OutBox\FlexArch.OutBox.Core.csproj" />
     <ProjectReference Include="..\FlexArch.OutBox.EFCore\FlexArch.OutBox.Persistence.EFCore.csproj" />
