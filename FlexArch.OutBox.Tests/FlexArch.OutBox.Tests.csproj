@@ -31,10 +31,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FlexArch.OutBox.Abstractions\FlexArch.OutBox.Abstractions.csproj" />
-    <ProjectReference Include="..\FlexArch.OutBox\FlexArch.OutBox.Core.csproj" />
-    <ProjectReference Include="..\FlexArch.OutBox.EFCore\FlexArch.OutBox.Persistence.EFCore.csproj" />
-    <ProjectReference
-      Include="..\FlexArch.Outbox.Publisher.RabbitMQ\FlexArch.Outbox.Publisher.RabbitMQ.csproj" />
+    <ProjectReference Include="..\FlexArch.OutBox.Core\FlexArch.OutBox.Core.csproj" />
+    <ProjectReference Include="..\FlexArch.OutBox.Persistence.EFCore\FlexArch.OutBox.Persistence.EFCore.csproj" />
+    <ProjectReference Include="..\FlexArch.Outbox.Publisher.RabbitMQ\FlexArch.OutBox.Publisher.RabbitMQ.csproj" />
   </ItemGroup>
 
 </Project>

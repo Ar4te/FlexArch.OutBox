@@ -1,238 +1,187 @@
-# FlexArch.OutBox 代码验证脚本
+# FlexArch.OutBox 验证脚本 - PowerShell 版
 param(
     [switch]$SkipTests,
     [switch]$SkipFormat,
     [switch]$SkipSecurity,
+    [switch]$SkipPack,
     [switch]$Verbose,
     [switch]$Help
 )
 
-# 颜色输出函数
-function Write-Success($msg) { Write-Host "✅ $msg" -ForegroundColor Green }
-function Write-Error($msg) { Write-Host "❌ $msg" -ForegroundColor Red }
-function Write-Warning($msg) { Write-Host "⚠️  $msg" -ForegroundColor Yellow }
-function Write-Info($msg) { Write-Host "ℹ️  $msg" -ForegroundColor Cyan }
-function Write-Step($msg) { Write-Host "🔄 $msg" -ForegroundColor Blue }
+function Write-Color { param([string]$Text, [string]$Color = "White"); Write-Host $Text -ForegroundColor $Color }
+function Write-Step($msg) { Write-Color "🔄 $msg" Blue }
+function Write-Info($msg) { Write-Color "ℹ️  $msg" Cyan }
+function Write-Success($msg) { Write-Color "✅ $msg" Green }
+function Write-WarningMsg($msg) { Write-Color "⚠️  $msg" Yellow }
+function Write-Failure($msg) { Write-Color "❌ $msg" Red }
 
-# 显示帮助
 function Show-Help {
-    Write-Host ""
-    Write-Host "FlexArch.OutBox 代码验证脚本" -ForegroundColor Magenta
-    Write-Host "用法: .\scripts\validate-code.ps1 [选项]" -ForegroundColor Yellow
-    Write-Host ""
-    Write-Host "选项:" -ForegroundColor Yellow
+    Write-Host "`nFlexArch.OutBox 代码验证脚本" -ForegroundColor Magenta
+    Write-Host "用法: .\validate-code.ps1 [选项]" -ForegroundColor Yellow
+    Write-Host "`n选项:"
     Write-Host "  -SkipTests     跳过单元测试"
     Write-Host "  -SkipFormat    跳过代码格式检查"
     Write-Host "  -SkipSecurity  跳过安全扫描"
+    Write-Host "  -SkipPack      跳过 NuGet 包打包"
     Write-Host "  -Verbose       显示详细输出"
     Write-Host "  -Help          显示此帮助信息"
-    Write-Host ""
-}
-
-if ($Help) {
-    Show-Help
     exit 0
 }
 
-Write-Host ""
-Write-Host "🚀 FlexArch.OutBox 代码质量验证" -ForegroundColor Magenta
-Write-Host "================================" -ForegroundColor Magenta
-Write-Host ""
+if ($Help) { Show-Help }
 
+Write-Host "`n🚀 FlexArch.OutBox 验证启动" -ForegroundColor Magenta
+$ErrorActionPreference = "Stop"
 $startTime = Get-Date
-$allPassed = $true
-
-# 1. 检查 .NET SDK
-Write-Step "检查 .NET SDK..."
-try {
-    $dotnetVersion = dotnet --version 2>$null
-    if ($dotnetVersion -like "8.*") {
-        Write-Success "发现 .NET SDK $dotnetVersion"
-    }
-    else {
-        Write-Warning "建议使用 .NET 8.x，当前版本: $dotnetVersion"
-    }
-}
-catch {
-    Write-Error "未找到 .NET SDK！请安装 .NET 8.0 SDK"
-    $allPassed = $false
+$solution = Get-ChildItem -Recurse -Filter *.sln | Select-Object -First 1
+if (-not $solution) {
+    Write-Failure "未找到解决方案文件 (*.sln)"
+    exit 1
 }
 
-# 2. 恢复依赖项
-if ($allPassed) {
-    Write-Step "恢复 NuGet 依赖项..."
-    dotnet restore --verbosity quiet
-    if ($LASTEXITCODE -eq 0) {
-        Write-Success "依赖项恢复成功"
-    }
-    else {
-        Write-Error "依赖项恢复失败"
-        $allPassed = $false
-    }
+$solutionPath = $solution.FullName
+$passed = $true
+
+# SDK 检查
+Write-Step ".NET SDK 检查..."
+$version = dotnet --version
+if ($version -like "8.*") {
+    Write-Success ".NET SDK 版本 $version"
+}
+else {
+    Write-WarningMsg "建议使用 .NET 8.x，当前为 $version"
 }
 
-# 3. 代码格式检查
-if ($allPassed -and -not $SkipFormat) {
-    Write-Step "检查代码格式..."
-    $verbosity = if ($Verbose) { "diagnostic" } else { "quiet" }
-    dotnet format --verify-no-changes --verbosity $verbosity
+# 恢复依赖
+Write-Step "恢复依赖项..."
+dotnet restore $solutionPath --verbosity quiet
+if ($LASTEXITCODE -ne 0) {
+    Write-Failure "依赖项恢复失败"
+    exit 1
+}
+Write-Success "依赖项恢复成功"
+
+# 格式检查
+if (-not $SkipFormat) {
+    Write-Step "代码格式检查..."
+    $verbosity = if ($Verbose) { "diagnostic" } else { "minimal" }
+    dotnet format $solutionPath --verify-no-changes --verbosity $verbosity
     if ($LASTEXITCODE -eq 0) {
         Write-Success "代码格式检查通过"
     }
     else {
-        Write-Error "代码格式不符合规范！运行 'dotnet format' 来修复"
-        $allPassed = $false
-    }
-}
-elseif ($SkipFormat) {
-    Write-Info "跳过代码格式检查"
-}
-
-# 4. 构建项目
-if ($allPassed) {
-    Write-Step "构建解决方案..."
-    $verbosity = if ($Verbose) { "normal" } else { "quiet" }
-    dotnet build --no-restore --configuration Release -p:TreatWarningsAsErrors=true --verbosity $verbosity
-    if ($LASTEXITCODE -eq 0) {
-        Write-Success "构建成功"
-    }
-    else {
-        Write-Error "构建失败！请修复编译错误和警告"
-        $allPassed = $false
-    }
-}
-
-# 5. 运行测试
-if ($allPassed -and -not $SkipTests) {
-    Write-Step "运行单元测试..."
-    $verbosity = if ($Verbose) { "detailed" } else { "quiet" }
-    dotnet test --no-build --configuration Release --logger "console;verbosity=$verbosity"
-    if ($LASTEXITCODE -eq 0) {
-        Write-Success "所有测试通过"
-    }
-    else {
-        Write-Error "测试失败！请修复失败的测试"
-        $allPassed = $false
-    }
-}
-elseif ($SkipTests) {
-    Write-Info "跳过测试"
-}
-
-# 6. 生成测试覆盖率
-if ($allPassed -and -not $SkipTests) {
-    Write-Step "生成测试覆盖率报告..."
-    if (Test-Path "TestResults") {
-        Remove-Item "TestResults" -Recurse -Force
-    }
-    dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults --logger "console;verbosity=quiet"
-    if ($LASTEXITCODE -eq 0) {
-        Write-Success "测试覆盖率报告生成完成"
-        Write-Info "覆盖率文件位置: TestResults/"
-    }
-    else {
-        Write-Warning "覆盖率报告生成失败"
-    }
-}
-
-# 7. 安全扫描
-if (-not $SkipSecurity) {
-    Write-Step "执行安全扫描..."
-    
-    Write-Info "检查已知安全漏洞..."
-    $vulnerableOutput = dotnet list package --vulnerable --include-transitive 2>&1 | Out-String
-    if ($vulnerableOutput -match "vulnerable") {
-        Write-Error "发现安全漏洞！"
-        if ($Verbose) {
-            Write-Host $vulnerableOutput
-        }
-        $allPassed = $false
-    }
-    else {
-        Write-Success "未发现安全漏洞"
-    }
-    
-    Write-Info "检查过时的依赖包..."
-    $outdatedOutput = dotnet list package --outdated 2>&1 | Out-String
-    if ($outdatedOutput -match "Project") {
-        Write-Warning "发现过时的依赖包，建议更新"
-        if ($Verbose) {
-            Write-Host $outdatedOutput
-        }
-    }
-    else {
-        Write-Success "所有依赖包都是最新的"
+        Write-Failure "代码格式不规范，请执行 'dotnet format' 修复"
+        $passed = $false
     }
 }
 else {
-    Write-Info "跳过安全扫描"
+    Write-Info "已跳过代码格式检查"
 }
 
-# 8. 创建 NuGet 包
-if ($allPassed) {
-    Write-Step "创建 NuGet 包..."
-    
-    if (-not (Test-Path "packages")) {
-        New-Item -ItemType Directory -Path "packages" | Out-Null
+# 构建项目
+Write-Step "构建项目..."
+dotnet build $solutionPath -c Release --no-restore -p:TreatWarningsAsErrors=true
+if ($LASTEXITCODE -eq 0) {
+    Write-Success "项目构建成功"
+}
+else {
+    Write-Failure "构建失败，请检查错误"
+    $passed = $false
+}
+
+# 测试执行
+if (-not $SkipTests) {
+    Write-Step "运行测试..."
+    dotnet test $solutionPath --no-build -c Release --logger "console;verbosity=detailed"
+    if ($LASTEXITCODE -eq 0) {
+        Write-Success "测试全部通过"
     }
-    
+    else {
+        Write-Failure "存在失败的测试"
+        $passed = $false
+    }
+
+    Write-Step "生成测试覆盖率..."
+    dotnet test --no-build -c Release --collect:"XPlat Code Coverage" --results-directory "TestResults"
+    if ($LASTEXITCODE -eq 0) {
+        Write-Success "测试覆盖率生成完成"
+        Write-Info "覆盖率结果: ./TestResults"
+    }
+    else {
+        Write-WarningMsg "测试覆盖率生成失败"
+    }
+}
+else {
+    Write-Info "已跳过测试执行"
+}
+
+# 安全检查
+if (-not $SkipSecurity) {
+    Write-Step "进行安全扫描..."
+    dotnet list package --vulnerable --include-transitive 2>&1 | Tee-Object -Variable vuln
+    if ($vuln -match "vulnerable") {
+        Write-Failure "发现安全漏洞！"
+        if ($Verbose) { $vuln | Write-Host }
+        $passed = $false
+    }
+    else {
+        Write-Success "未发现已知安全漏洞"
+    }
+
+    Write-Step "检查过时依赖..."
+    $outdated = dotnet list package --outdated 2>&1
+    if ($outdated -match "Project") {
+        Write-WarningMsg "存在过时依赖包"
+        if ($Verbose) { $outdated | Write-Host }
+    }
+    else {
+        Write-Success "所有依赖为最新"
+    }
+}
+else {
+    Write-Info "已跳过安全检查"
+}
+
+# 打包
+if (-not $SkipPack -and $passed) {
+    Write-Step "打包 NuGet 包..."
     $projects = @(
-        "FlexArch.OutBox.Abstractions/FlexArch.OutBox.Abstractions.csproj",
-        "FlexArch.OutBox/FlexArch.OutBox.Core.csproj",
-        "FlexArch.OutBox.EFCore/FlexArch.OutBox.Persistence.EFCore.csproj",
-        "FlexArch.Outbox.Publisher.RabbitMQ/FlexArch.Outbox.Publisher.RabbitMQ.csproj"
+        "FlexArch.OutBox.Abstractions",
+        "FlexArch.OutBox.Core",
+        "FlexArch.OutBox.Persistence.EFCore",
+        "FlexArch.OutBox.Publisher.RabbitMQ"
     )
-    
-    $packageSuccess = $true
-    foreach ($project in $projects) {
-        if (Test-Path $project) {
-            Write-Info "打包 $project..."
-            dotnet pack $project --no-build --configuration Release --output packages --verbosity quiet
+
+    foreach ($proj in $projects) {
+        $csproj = "$proj/$proj.csproj"
+        if (Test-Path $csproj) {
+            dotnet pack $csproj --no-build -c Release -o ./packages
             if ($LASTEXITCODE -ne 0) {
-                Write-Error "打包 $project 失败"
-                $packageSuccess = $false
+                Write-Failure "打包失败: $proj"
+                $passed = $false
+            }
+            else {
+                Write-Success "已打包: $proj"
             }
         }
         else {
-            Write-Warning "项目文件不存在: $project"
+            Write-WarningMsg "未找到项目: $csproj"
         }
     }
-    
-    if ($packageSuccess) {
-        Write-Success "所有包创建成功"
-        Write-Info "包位置: packages/"
-    }
-    else {
-        Write-Error "包创建失败"
-        $allPassed = $false
-    }
+}
+else {
+    Write-Info "跳过 NuGet 打包"
 }
 
 # 总结
-$endTime = Get-Date
-$duration = $endTime - $startTime
-
-Write-Host ""
-Write-Host "📊 验证结果总结" -ForegroundColor Magenta
-Write-Host "=================" -ForegroundColor Magenta
-
-if ($allPassed) {
-    Write-Success "所有检查通过！代码已准备好提交 ✨"
-    Write-Host ""
-    Write-Info "✅ .NET SDK 检查"
-    Write-Info "✅ 依赖项恢复"
-    if (-not $SkipFormat) { Write-Info "✅ 代码格式检查" }
-    Write-Info "✅ 项目构建"
-    if (-not $SkipTests) { Write-Info "✅ 单元测试" }
-    if (-not $SkipTests) { Write-Info "✅ 测试覆盖率" }
-    if (-not $SkipSecurity) { Write-Info "✅ 安全扫描" }
-    Write-Info "✅ NuGet 包创建"
+$duration = (Get-Date) - $startTime
+Write-Host "`n📊 验证总结：" -ForegroundColor Magenta
+if ($passed) {
+    Write-Info "验证时间: $duration"
+    Write-Success "所有检查通过 🎉"
+    exit 0
 }
 else {
-    Write-Error "部分检查失败！请修复问题后重试"
+    Write-Failure "部分检查失败，请修复后重试"
     exit 1
 }
-
-Write-Host ""
-Write-Info "Total time: $([math]::Round($duration.TotalSeconds, 2)) seconds"
-Write-Host "" 

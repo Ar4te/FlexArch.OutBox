@@ -6,6 +6,8 @@ on:
 
 env:
   DOTNET_VERSION: "8.0.x"
+  SOLUTION_PATH: "./FlexArch.OutBox.sln"
+  COVERAGE_THRESHOLD: "0.70"
 
 jobs:
   pr-validation:
@@ -13,38 +15,68 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 检出代码
+      - name: 🔽 检出代码
         uses: actions/checkout@v4
 
-      - name: 设置 .NET
+      - name: 🛠️ 设置 .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: 恢复依赖项
-        run: dotnet restore
+      - name: 📦 恢复依赖项
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
 
-      - name: 代码格式检查
-        run: dotnet format --verify-no-changes --verbosity diagnostic
+      - name: 📝 代码格式检查
+        run: |
+          dotnet format ${{ env.SOLUTION_PATH }} --verify-no-changes --verbosity diagnostic || {
+            echo "❌ 代码格式不符合规范，请运行 'dotnet format' 修复后再提交。"
+            exit 1
+          }
 
-      - name: 构建检查
-        run: dotnet build -c Release --no-restore -p:TreatWarningsAsErrors=true
+      - name: 🧱 构建检查（含警告）
+        run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration Release -p:TreatWarningsAsErrors=true
 
-      - name: 运行测试
-        run: dotnet test --no-build --configuration Release --logger "console;verbosity=detailed"
+      - name: 🧪 运行测试
+        run: dotnet test ${{ env.SOLUTION_PATH }} --no-build --configuration Release --logger "console;verbosity=detailed"
 
-      - name: 采集测试覆盖率
-        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
+      - name: 📊 采集测试覆盖率
+        run: dotnet test ${{ env.SOLUTION_PATH }} --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
 
-      - name: 上传覆盖率结果
+      - name: 📦 上传覆盖率结果
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage
           path: ./coverage
 
-      - name: PR 检查完成
+      - name: ✅ 覆盖率阈值检查
         run: |
-          echo "✅ 所有检查通过！PR 可以合并。"
-          echo "📊 构建状态: 通过"
-          echo "🧪 测试状态: 通过" 
-          echo "📝 格式检查: 通过"
+          FILE=$(find ./coverage -name 'coverage.cobertura.xml' | head -n 1)
+          if [ -f "$FILE" ]; then
+            RATE=$(grep -oP 'line-rate="\K[0-9.]+' "$FILE")
+            echo "📈 检测到覆盖率: $RATE"
+            if (( $(echo "$RATE < $COVERAGE_THRESHOLD" | bc -l) )); then
+              echo "❌ 覆盖率低于最低阈值 $COVERAGE_THRESHOLD"
+              exit 1
+            else
+              echo "✅ 覆盖率达标"
+            fi
+          else
+            echo "⚠️ 未找到覆盖率报告文件"
+            exit 1
+          fi
+
+      # 如果你启用了 Codecov.io，可启用此步骤
+      # - name: ☁️ 上传到 Codecov（可选）
+      #   uses: codecov/codecov-action@v3
+      #   with:
+      #     directory: ./coverage
+      #     flags: pull-request
+      #     name: pr-check
+
+      - name: ✅ PR 检查完成
+        run: |
+          echo "✅ 所有检查通过，PR 可以合并。"
+          echo "📝 代码格式: 通过"
+          echo "📦 构建状态: 成功"
+          echo "🧪 测试状态: 成功"
+          echo "📈 覆盖率检查: 通过"

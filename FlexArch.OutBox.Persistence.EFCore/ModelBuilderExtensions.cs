@@ -1,4 +1,4 @@
-using FlexArch.OutBox.EFCore.Configuration;
+using FlexArch.OutBox.Persistence.EFCore.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlexArch.OutBox.Persistence.EFCore;

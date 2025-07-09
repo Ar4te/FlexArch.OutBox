@@ -11,16 +11,15 @@ env:
   SOLUTION_PATH: "./FlexArch.OutBox.sln"
 
 jobs:
-  # 代码质量和安全检查
+  # 代码质量检查
   code-quality:
     name: 代码质量检查
     runs-on: ubuntu-latest
-
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # 获取完整历史记录用于 SonarCloud 分析
+          fetch-depth: 0
 
       - name: 设置 .NET
         uses: actions/setup-dotnet@v4
@@ -31,12 +30,14 @@ jobs:
         run: dotnet restore ${{ env.SOLUTION_PATH }}
 
       - name: 代码格式检查
-        run: dotnet format ${{ env.SOLUTION_PATH }} --verify-no-changes --verbosity diagnostic
-
-      - name: 静态代码分析
         run: |
-          dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration Release --verbosity normal
-          # 可以在这里添加其他静态分析工具
+          dotnet format ${{ env.SOLUTION_PATH }} --verify-no-changes --verbosity diagnostic || {
+            echo "❌ 代码格式不符合规范，请运行 'dotnet format' 修复格式问题。"
+            exit 1
+          }
+
+      - name: 构建检查
+        run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration Release
 
   # 构建和测试
   build-and-test:
@@ -45,29 +46,23 @@ jobs:
     strategy:
       matrix:
         configuration: [Debug, Release]
-
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 设置 .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: 缓存 NuGet 包
-        uses: actions/cache@v3
+      - uses: actions/cache@v3
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: 恢复依赖项
-        run: dotnet restore ${{ env.SOLUTION_PATH }}
+      - run: dotnet restore ${{ env.SOLUTION_PATH }}
 
-      - name: 构建解决方案
-        run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration ${{ matrix.configuration }}
+      - run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration ${{ matrix.configuration }}
 
       - name: 运行测试
         run: |
@@ -86,44 +81,61 @@ jobs:
           path: ./TestResults
 
       - name: 发布代码覆盖率报告
-        uses: codecov/codecov-action@v3
         if: matrix.configuration == 'Release'
+        uses: codecov/codecov-action@v3
         with:
           directory: ./TestResults
           flags: unittests
           name: codecov-umbrella
 
+      - name: 检查测试覆盖率阈值
+        if: matrix.configuration == 'Release'
+        run: |
+          FILE=$(find ./TestResults -name 'coverage.cobertura.xml' | head -n 1)
+          if [ -f "$FILE" ]; then
+            RATE=$(grep -oP 'line-rate="\K[0-9.]+' "$FILE")
+            THRESHOLD=0.70
+            echo "📈 覆盖率: $RATE"
+            if (( $(echo "$RATE < $THRESHOLD" | bc -l) )); then
+              echo "❌ 覆盖率低于阈值 $THRESHOLD"
+              exit 1
+            else
+              echo "✅ 覆盖率达标"
+            fi
+          else
+            echo "⚠️ 未找到覆盖率报告"
+            exit 1
+          fi
+
   # 安全扫描
   security-scan:
     name: 安全扫描
     runs-on: ubuntu-latest
-
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 设置 .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: 恢复依赖项
-        run: dotnet restore ${{ env.SOLUTION_PATH }}
+      - run: dotnet restore ${{ env.SOLUTION_PATH }}
 
       - name: 安全漏洞扫描
         run: |
-          dotnet list package --vulnerable --include-transitive 2>&1 | tee vulnerable-packages.log
-          if grep -q "vulnerable" vulnerable-packages.log; then
-            echo "发现安全漏洞!"
-            cat vulnerable-packages.log
+          dotnet list package --vulnerable --include-transitive | tee vulnerable-packages.log
+          if grep -E "Severity\s+:|Transitive Package\s+" vulnerable-packages.log > /dev/null; then
+            echo "❌ 发现安全漏洞！请查看 vulnerable-packages.log。"
             exit 1
+          else
+            echo "✅ 未发现安全漏洞。"
           fi
 
       - name: 过时包检查
         run: |
-          dotnet list package --outdated 2>&1 | tee outdated-packages.log
+          dotnet list package --outdated --include-transitive | tee outdated-packages.log
+          echo "📦 过时包信息检查完成。"
 
-      - name: 上传安全扫描结果
+      - name: 上传安全扫描日志
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -132,99 +144,72 @@ jobs:
             vulnerable-packages.log
             outdated-packages.log
 
-  # 包构建和发布（仅在主分支）
+  # 包构建和发布
   package:
     name: 构建 NuGet 包
     runs-on: ubuntu-latest
     needs: [code-quality, build-and-test, security-scan]
     if: github.ref == 'refs/heads/master'
-
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 设置 .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: 恢复依赖项
-        run: dotnet restore ${{ env.SOLUTION_PATH }}
+      - run: dotnet restore ${{ env.SOLUTION_PATH }}
 
-      - name: 构建发布版本
-        run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration Release
+      - run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration Release
 
       - name: 创建 NuGet 包
         run: |
+          mkdir -p ./packages
           dotnet pack ./FlexArch.OutBox.Abstractions/FlexArch.OutBox.Abstractions.csproj --no-build --configuration Release --output ./packages
           dotnet pack ./FlexArch.OutBox/FlexArch.OutBox.Core.csproj --no-build --configuration Release --output ./packages
           dotnet pack ./FlexArch.OutBox.EFCore/FlexArch.OutBox.Persistence.EFCore.csproj --no-build --configuration Release --output ./packages
           dotnet pack ./FlexArch.Outbox.Publisher.RabbitMQ/FlexArch.Outbox.Publisher.RabbitMQ.csproj --no-build --configuration Release --output ./packages
 
-      - name: 上传 NuGet 包
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: nuget-packages
           path: ./packages/*.nupkg
 
-    # 如果需要自动发布到 NuGet.org，可以取消注释以下步骤
-    # - name: 发布到 NuGet
-    #   if: startsWith(github.ref, 'refs/tags/v')
-    #   run: |
-    #     dotnet nuget push ./packages/*.nupkg \
-    #       --api-key ${{ secrets.NUGET_API_KEY }} \
-    #       --source https://api.nuget.org/v3/index.json \
-    #       --skip-duplicate
+      # - name: 发布到 NuGet（可选）
+      #   if: startsWith(github.ref, 'refs/tags/v')
+      #   run: |
+      #     dotnet nuget push ./packages/*.nupkg \
+      #       --api-key ${{ secrets.NUGET_API_KEY }} \
+      #       --source https://api.nuget.org/v3/index.json \
+      #       --skip-duplicate
 
-  # 性能测试（可选）
+  # 性能测试（占位）
   performance-test:
     name: 性能测试
     runs-on: ubuntu-latest
     needs: [build-and-test]
     if: github.event_name == 'pull_request'
-
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
-
-      - name: 设置 .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+      - run: dotnet restore ${{ env.SOLUTION_PATH }}
+      - run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration Release
+      - run: |
+          echo "📈 性能测试占位：可集成 NBomber 或 BenchmarkDotNet"
 
-      - name: 恢复依赖项
-        run: dotnet restore ${{ env.SOLUTION_PATH }}
-
-      - name: 构建发布版本
-        run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration Release
-
-      # 这里可以添加性能测试命令
-      - name: 运行性能测试
-        run: |
-          echo "性能测试占位符 - 可以集成 NBomber 或其他性能测试工具"
-          # dotnet run --project ./PerformanceTests --configuration Release
-
-  # 通知
+  # 通知（可拓展 Slack、飞书、Teams）
   notify:
     name: 通知
     runs-on: ubuntu-latest
     needs: [code-quality, build-and-test, security-scan]
     if: always()
-
     steps:
-      - name: 检查工作流程状态
+      - name: 工作流状态报告
         run: |
           if [[ "${{ needs.code-quality.result }}" == "failure" || "${{ needs.build-and-test.result }}" == "failure" || "${{ needs.security-scan.result }}" == "failure" ]]; then
-            echo "工作流程失败"
+            echo "❌ 工作流失败"
             exit 1
           else
-            echo "工作流程成功"
+            echo "✅ 所有检查通过"
           fi
-
-    # 可以添加 Slack、Teams 或邮件通知
-    # - name: Slack 通知
-    #   if: failure()
-    #   uses: 8398a7/action-slack@v3
-    #   with:
-    #     status: failure
-    #     webhook_url: ${{ secrets.SLACK_WEBHOOK }}

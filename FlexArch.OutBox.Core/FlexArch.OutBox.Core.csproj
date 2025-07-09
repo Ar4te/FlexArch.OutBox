@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -14,8 +14,8 @@
     <Description>FlexArch OutBox核心实现 - 包含中间件、后台服务、配置等完整功能</Description>
     <PackageTags>
       outbox;distributed-transactions;microservices;middleware;background-services;ddd;clean-architecture</PackageTags>
-    <PackageProjectUrl>https://github.com/your-username/FlexArch.OutBox</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/your-username/FlexArch.OutBox</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Ar4te/FlexArch.OutBox</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ar4te/FlexArch.OutBox</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReleaseNotes>Initial alpha release with middleware pipeline, background services, and

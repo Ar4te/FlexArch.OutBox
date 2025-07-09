@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36221.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlexArch.OutBox.Core", "FlexArch.OutBox\FlexArch.OutBox.Core.csproj", "{9A66157F-6C30-47BC-97F0-BF8727956F21}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlexArch.OutBox.Core", "FlexArch.OutBox.Core\FlexArch.OutBox.Core.csproj", "{9A66157F-6C30-47BC-97F0-BF8727956F21}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlexArch.OutBox.Abstractions", "FlexArch.OutBox.Abstractions\FlexArch.OutBox.Abstractions.csproj", "{A71136A5-E20B-4DF2-B649-7013D79DCA31}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlexArch.OutBox.Persistence.EFCore", "FlexArch.OutBox.EFCore\FlexArch.OutBox.Persistence.EFCore.csproj", "{BDF86E56-75EE-492C-BA52-065F7B4BA2CD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlexArch.OutBox.Persistence.EFCore", "FlexArch.OutBox.Persistence.EFCore\FlexArch.OutBox.Persistence.EFCore.csproj", "{BDF86E56-75EE-492C-BA52-065F7B4BA2CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlexArch.Outbox.Publisher.RabbitMQ", "FlexArch.Outbox.Publisher.RabbitMQ\FlexArch.Outbox.Publisher.RabbitMQ.csproj", "{C217B841-B600-4603-8B99-E9902A7A65E6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlexArch.OutBox.Publisher.RabbitMQ", "FlexArch.Outbox.Publisher.RabbitMQ\FlexArch.OutBox.Publisher.RabbitMQ.csproj", "{C217B841-B600-4603-8B99-E9902A7A65E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlexArch.Outbox.TestAPI", "FlexArch.Outbox.TestAPI\FlexArch.Outbox.TestAPI.csproj", "{DC4D9484-DFEE-45D3-9D82-D90340C76460}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlexArch.OutBox.TestAPI", "FlexArch.Outbox.TestAPI\FlexArch.OutBox.TestAPI.csproj", "{DC4D9484-DFEE-45D3-9D82-D90340C76460}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlexArch.OutBox.Tests", "FlexArch.OutBox.Tests\FlexArch.OutBox.Tests.csproj", "{C9E04CAE-6672-46F6-A98B-57634E316059}"
 EndProject

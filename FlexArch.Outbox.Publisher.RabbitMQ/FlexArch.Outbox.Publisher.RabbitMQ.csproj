@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -13,8 +13,8 @@
     <Product>FlexArch.OutBox</Product>
     <Description>FlexArch OutBox RabbitMQ消息发布器 - 高性能的RabbitMQ集成实现</Description>
     <PackageTags>outbox;rabbitmq;amqp;message-broker;publisher;microservices</PackageTags>
-    <PackageProjectUrl>https://github.com/your-username/FlexArch.OutBox</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/your-username/FlexArch.OutBox</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Ar4te/FlexArch.OutBox</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ar4te/FlexArch.OutBox</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReleaseNotes>Initial alpha release with optimized RabbitMQ connection management</PackageReleaseNotes>
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FlexArch.OutBox.EFCore\FlexArch.OutBox.Persistence.EFCore.csproj" />
+    <ProjectReference Include="..\FlexArch.OutBox.Persistence.EFCore\FlexArch.OutBox.Persistence.EFCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>

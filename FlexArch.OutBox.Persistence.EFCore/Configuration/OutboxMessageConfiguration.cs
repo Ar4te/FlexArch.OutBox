@@ -3,14 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.Text.Json;
 
-namespace FlexArch.OutBox.EFCore.Configuration;
+namespace FlexArch.OutBox.Persistence.EFCore.Configuration;
 
 /// <summary>
-/// DeadLetterMessage实体配置，实现IEntityTypeConfiguration以提供非侵入式配置
+/// OutboxMessage实体配置，实现IEntityTypeConfiguration以提供非侵入式配置
 /// </summary>
-public class DeadLetterMessageConfiguration : IEntityTypeConfiguration<DeadLetterMessage>
+public class OutboxMessageConfiguration : IEntityTypeConfiguration<OutboxMessage>
 {
-    public void Configure(EntityTypeBuilder<DeadLetterMessage> builder)
+    public void Configure(EntityTypeBuilder<OutboxMessage> builder)
     {
         // 主键配置
         builder.HasKey(x => x.Id);
@@ -30,10 +30,17 @@ public class DeadLetterMessageConfiguration : IEntityTypeConfiguration<DeadLette
         builder.Property(x => x.CreatedAt)
             .IsRequired();
 
-        builder.Property(x => x.FailedAt)
+        builder.Property(x => x.Status)
+            .IsRequired()
+            .HasConversion<int>();
+
+        builder.Property(x => x.SentAt)
+            .IsRequired(false);
+
+        builder.Property(x => x.RetryCount)
             .IsRequired();
 
-        builder.Property(x => x.ErrorReason)
+        builder.Property(x => x.LastError)
             .HasMaxLength(2000);
 
         // Headers字段JSON序列化配置 - 确保反序列化后的值类型兼容RabbitMQ
@@ -44,10 +51,10 @@ public class DeadLetterMessageConfiguration : IEntityTypeConfiguration<DeadLette
             );
 
         // 性能优化索引
-        builder.HasIndex(x => x.FailedAt, "IX_DeadLetterMessage_FailedAt");
-        builder.HasIndex(x => x.Type, "IX_DeadLetterMessage_Type");
-        builder.HasIndex(x => x.CreatedAt, "IX_DeadLetterMessage_CreatedAt");
-        builder.HasIndex(x => new { x.Type, x.FailedAt }, "IX_DeadLetterMessage_Type_FailedAt");
+        builder.HasIndex(x => new { x.Status, x.CreatedAt }, "IX_OutboxMessage_Status_CreatedAt");
+        builder.HasIndex(x => x.SentAt, "IX_OutboxMessage_SentAt");
+        builder.HasIndex(x => x.Type, "IX_OutboxMessage_Type");
+        builder.HasIndex(x => new { x.Status, x.SentAt }, "IX_OutboxMessage_Status_SentAt");
     }
 
     /// <summary>
