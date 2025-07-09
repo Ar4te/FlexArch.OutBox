@@ -1,0 +1,6 @@
+@FlexArch.Outbox.TestAPI_HostAddress = http://localhost:5121
+
+GET {{FlexArch.Outbox.TestAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

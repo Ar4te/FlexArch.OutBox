@@ -1,0 +1,61 @@
+name: Pull Request 检查
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+env:
+  DOTNET_VERSION: "8.0.x"
+
+jobs:
+  pr-validation:
+    name: PR 验证
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: 恢复依赖项
+        run: dotnet restore
+
+      - name: 代码格式检查
+        run: |
+          dotnet format --verify-no-changes --verbosity diagnostic
+          if [ $? -ne 0 ]; then
+            echo "❌ 代码格式不符合规范！请运行 'dotnet format' 来修复格式问题。"
+            exit 1
+          fi
+
+      - name: 构建检查
+        run: |
+          dotnet build --no-restore --configuration Release -p:TreatWarningsAsErrors=true
+          if [ $? -ne 0 ]; then
+            echo "❌ 构建失败！请修复编译错误和警告。"
+            exit 1
+          fi
+
+      - name: 运行测试
+        run: |
+          dotnet test --no-build --configuration Release --logger "console;verbosity=detailed"
+          if [ $? -ne 0 ]; then
+            echo "❌ 测试失败！请修复失败的测试。"
+            exit 1
+          fi
+
+      - name: 检查测试覆盖率
+        run: |
+          dotnet test --collect:"XPlat Code Coverage" --results-directory ./coverage
+          # 这里可以添加覆盖率阈值检查
+
+      - name: PR 检查完成
+        run: |
+          echo "✅ 所有检查通过！PR 可以合并。"
+          echo "📊 构建状态: 通过"
+          echo "🧪 测试状态: 通过" 
+          echo "📝 格式检查: 通过"

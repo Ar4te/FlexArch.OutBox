@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <!-- NuGet Package Configuration -->
+    <PackageId>FlexArch.OutBox.EntityFramework</PackageId>
+    <Version>1.0.0-alpha.1</Version>
+    <Authors>FlexArch Team</Authors>
+    <Company>FlexArch</Company>
+    <Product>FlexArch.OutBox</Product>
+    <Description>FlexArch OutBox Entity Framework Core持久化实现 - 支持所有主流数据库</Description>
+    <PackageTags>outbox;entityframework;efcore;persistence;sql-server;postgresql;mysql;sqlite;oracle</PackageTags>
+    <PackageProjectUrl>https://github.com/your-username/FlexArch.OutBox</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/your-username/FlexArch.OutBox</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReleaseNotes>Initial alpha release with EF Core integration and optimized database
+      access</PackageReleaseNotes>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FlexArch.OutBox.Abstractions\FlexArch.OutBox.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

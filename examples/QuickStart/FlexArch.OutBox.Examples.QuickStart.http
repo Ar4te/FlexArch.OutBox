@@ -1,0 +1,6 @@
+@FlexArch.OutBox.Examples.QuickStart_HostAddress = http://localhost:5184
+
+GET {{FlexArch.OutBox.Examples.QuickStart_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

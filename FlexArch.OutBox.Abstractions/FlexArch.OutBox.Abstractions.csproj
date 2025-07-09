@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <!-- NuGet Package Configuration -->
+    <PackageId>FlexArch.OutBox.Abstractions</PackageId>
+    <Version>1.0.0-alpha.1</Version>
+    <Authors>FlexArch Team</Authors>
+    <Company>FlexArch</Company>
+    <Product>FlexArch.OutBox</Product>
+    <Description>分布式事务OutBox模式核心抽象接口 - 无第三方依赖的纯接口定义</Description>
+    <PackageTags>outbox;distributed-transactions;microservices;abstractions;ddd;clean-architecture</PackageTags>
+    <PackageProjectUrl>https://github.com/your-username/FlexArch.OutBox</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/your-username/FlexArch.OutBox</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReleaseNotes>Initial alpha release of OutBox abstractions</PackageReleaseNotes>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

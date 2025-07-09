@@ -361,3 +361,12 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# TestResults
+[Tt]est[Rr]esults/
+
+# TestCoverage
+[Tt]est[Cc]overage/
+
+# Nuget Package
+[Pp]ackages/
