@@ -25,33 +25,22 @@ jobs:
         run: dotnet restore
 
       - name: 代码格式检查
-        run: |
-          dotnet format --verify-no-changes --verbosity diagnostic
-          if [ $? -ne 0 ]; then
-            echo "❌ 代码格式不符合规范！请运行 'dotnet format' 来修复格式问题。"
-            exit 1
-          fi
+        run: dotnet format --verify-no-changes --verbosity diagnostic
 
       - name: 构建检查
-        run: |
-          dotnet build --no-restore --configuration Release -p:TreatWarningsAsErrors=true
-          if [ $? -ne 0 ]; then
-            echo "❌ 构建失败！请修复编译错误和警告。"
-            exit 1
-          fi
+        run: dotnet build -c Release --no-restore -p:TreatWarningsAsErrors=true
 
       - name: 运行测试
-        run: |
-          dotnet test --no-build --configuration Release --logger "console;verbosity=detailed"
-          if [ $? -ne 0 ]; then
-            echo "❌ 测试失败！请修复失败的测试。"
-            exit 1
-          fi
+        run: dotnet test --no-build --configuration Release --logger "console;verbosity=detailed"
 
-      - name: 检查测试覆盖率
-        run: |
-          dotnet test --collect:"XPlat Code Coverage" --results-directory ./coverage
-          # 这里可以添加覆盖率阈值检查
+      - name: 采集测试覆盖率
+        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
+
+      - name: 上传覆盖率结果
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage
+          path: ./coverage
 
       - name: PR 检查完成
         run: |

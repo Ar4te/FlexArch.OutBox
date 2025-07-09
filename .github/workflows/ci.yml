@@ -79,7 +79,7 @@ jobs:
             --results-directory ./TestResults
 
       - name: 上传测试结果
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results-${{ matrix.configuration }}
@@ -124,7 +124,7 @@ jobs:
           dotnet list package --outdated 2>&1 | tee outdated-packages.log
 
       - name: 上传安全扫描结果
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: security-scan-results
@@ -162,7 +162,7 @@ jobs:
           dotnet pack ./FlexArch.Outbox.Publisher.RabbitMQ/FlexArch.Outbox.Publisher.RabbitMQ.csproj --no-build --configuration Release --output ./packages
 
       - name: 上传 NuGet 包
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: nuget-packages
           path: ./packages/*.nupkg
