@@ -14,15 +14,10 @@ public static class OutboxExtensions
         Action<OutboxCleanupOptions>? outboxCleanupConfigure = null,
         Action<DeadLetterCleanupOptions>? deadLetterCleanupConfigure = null)
     {
+        Action<OutboxOptions> _outboxConfigure = outboxConfigure ?? (_ => { });
+
         // 配置核心OutBox选项
-        if (outboxConfigure != null)
-        {
-            services.Configure(outboxConfigure);
-        }
-        else
-        {
-            services.Configure<OutboxOptions>(_ => { }); // 使用默认配置
-        }
+        services.Configure(_outboxConfigure);
 
         services.AddHostedService<OutboxProcessor>();
 
