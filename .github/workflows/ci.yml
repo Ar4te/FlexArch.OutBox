@@ -165,9 +165,9 @@ jobs:
         run: |
           mkdir -p ./packages
           dotnet pack ./FlexArch.OutBox.Abstractions/FlexArch.OutBox.Abstractions.csproj --no-build --configuration Release --output ./packages
-          dotnet pack ./FlexArch.OutBox/FlexArch.OutBox.Core.csproj --no-build --configuration Release --output ./packages
-          dotnet pack ./FlexArch.OutBox.EFCore/FlexArch.OutBox.Persistence.EFCore.csproj --no-build --configuration Release --output ./packages
-          dotnet pack ./FlexArch.Outbox.Publisher.RabbitMQ/FlexArch.Outbox.Publisher.RabbitMQ.csproj --no-build --configuration Release --output ./packages
+          dotnet pack ./FlexArch.OutBox.Core/FlexArch.OutBox.Core.csproj --no-build --configuration Release --output ./packages
+          dotnet pack ./FlexArch.OutBox.Persistence.EFCore/FlexArch.OutBox.Persistence.EFCore.csproj --no-build --configuration Release --output ./packages
+          dotnet pack ./FlexArch.OutBox.Publisher.RabbitMQ/FlexArch.OutBox.Publisher.RabbitMQ.csproj --no-build --configuration Release --output ./packages
 
       - uses: actions/upload-artifact@v4
         with:
