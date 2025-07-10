@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
-namespace FlexArch.Outbox.Publisher.RabbitMQ;
+namespace FlexArch.OutBox.Publisher.RabbitMQ;
 
 /// <summary>
 /// RabbitMQ连接管理器，负责管理连接的创建和生命周期

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace FlexArch.Outbox.TestAPI.Controllers
+namespace FlexArch.OutBox.TestAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]

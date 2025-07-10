@@ -1,4 +1,4 @@
-namespace FlexArch.Outbox.TestAPI
+namespace FlexArch.OutBox.TestAPI
 {
     public class WeatherForecast
     {

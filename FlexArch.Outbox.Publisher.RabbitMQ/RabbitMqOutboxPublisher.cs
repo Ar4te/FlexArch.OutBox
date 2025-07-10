@@ -5,7 +5,7 @@ using FlexArch.OutBox.Abstractions.IModels;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
-namespace FlexArch.Outbox.Publisher.RabbitMQ;
+namespace FlexArch.OutBox.Publisher.RabbitMQ;
 
 /// <summary>
 /// 基于 RabbitMQ 的 OutBox 消息发布器实现

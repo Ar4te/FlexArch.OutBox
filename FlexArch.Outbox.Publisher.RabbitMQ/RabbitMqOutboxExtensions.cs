@@ -2,7 +2,7 @@ using FlexArch.OutBox.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 
-namespace FlexArch.Outbox.Publisher.RabbitMQ;
+namespace FlexArch.OutBox.Publisher.RabbitMQ;
 
 public static class RabbitMqOutboxExtensions
 {
