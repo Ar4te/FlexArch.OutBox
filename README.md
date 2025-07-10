@@ -1,6 +1,9 @@
 # FlexArch.OutBox
 
-[![NuGet](https://img.shields.io/nuget/v/FlexArch.OutBox.svg)](https://www.nuget.org/packages/FlexArch.OutBox/)
+[![NuGet](https://img.shields.io/nuget/v/FlexArch.OutBox.Abstractions.svg)](https://www.nuget.org/packages/FlexArch.OutBox.Abstractions/)
+[![NuGet](https://img.shields.io/nuget/v/FlexArch.OutBox.Core.svg)](https://www.nuget.org/packages/FlexArch.OutBox.Core/)
+[![NuGet](https://img.shields.io/nuget/v/FlexArch.OutBox.EntityFramework.svg)](https://www.nuget.org/packages/FlexArch.OutBox.EntityFramework/)
+[![NuGet](https://img.shields.io/nuget/v/FlexArch.OutBox.RabbitMQ.svg)](https://www.nuget.org/packages/FlexArch.OutBox.RabbitMQ/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![.NET](https://img.shields.io/badge/.NET-8.0%2B-blue)](https://dotnet.microsoft.com/)
 
