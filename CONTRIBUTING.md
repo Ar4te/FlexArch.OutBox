@@ -365,9 +365,9 @@ FlexArch.OutBox/
 ├── FlexArch.OutBox.Abstractions/     # 核心抽象和接口
 ├── FlexArch.OutBox.Core/            # 核心实现
 ├── FlexArch.OutBox.EFCore/          # EF Core 持久化
-├── FlexArch.Outbox.Publisher.RabbitMQ/ # RabbitMQ 发布器
+├── FlexArch.OutBox.Publisher.RabbitMQ/ # RabbitMQ 发布器
 ├── FlexArch.OutBox.Tests/           # 单元测试
-├── FlexArch.Outbox.TestAPI/         # 测试 API
+├── FlexArch.OutBox.TestAPI/         # 测试 API
 └── examples/                        # 示例项目
 ```
 

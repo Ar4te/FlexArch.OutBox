@@ -41,7 +41,7 @@ dotnet add package FlexArch.OutBox.Core --version 1.0.0-alpha.1
 dotnet add package FlexArch.OutBox.Persistence.EFCore --version 1.0.0-alpha.1
 
 # RabbitMQ 发布器
-dotnet add package FlexArch.Outbox.Publisher.RabbitMQ --version 1.0.0-alpha.1
+dotnet add package FlexArch.OutBox.Publisher.RabbitMQ --version 1.0.0-alpha.1
 
 # 抽象接口（通常自动引用）
 dotnet add package FlexArch.OutBox.Abstractions --version 1.0.0-alpha.1

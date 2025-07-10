@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <!-- NuGet Package Configuration -->
+    <PackageId>FlexArch.OutBox.RabbitMQ</PackageId>
+    <Version>1.0.0-alpha.1</Version>
+    <Authors>FlexArch Team</Authors>
+    <Company>FlexArch</Company>
+    <Product>FlexArch.OutBox</Product>
+    <Description>FlexArch OutBox RabbitMQ消息发布器 - 高性能的RabbitMQ集成实现</Description>
+    <PackageTags>outbox;rabbitmq;amqp;message-broker;publisher;microservices</PackageTags>
+    <PackageProjectUrl>https://github.com/Ar4te/FlexArch.OutBox</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ar4te/FlexArch.OutBox</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReleaseNotes>Initial alpha release with optimized RabbitMQ connection management</PackageReleaseNotes>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.6" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FlexArch.OutBox.Persistence.EFCore\FlexArch.OutBox.Persistence.EFCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

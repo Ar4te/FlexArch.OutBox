@@ -1,4 +1,4 @@
-using FlexArch.Outbox.Publisher.RabbitMQ;
+using FlexArch.OutBox.Publisher.RabbitMQ;
 using FlexArch.OutBox.Abstractions;
 using FlexArch.OutBox.Core;
 using FlexArch.OutBox.Core.Middlewares;

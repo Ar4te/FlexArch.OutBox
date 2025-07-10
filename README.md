@@ -31,7 +31,7 @@ dotnet add package FlexArch.OutBox.Core
 dotnet add package FlexArch.OutBox.Persistence.EFCore
 
 # RabbitMQ消息发布
-dotnet add package FlexArch.Outbox.Publisher.RabbitMQ
+dotnet add package FlexArch.OutBox.Publisher.RabbitMQ
 ```
 
 ### 基础配置
@@ -190,7 +190,7 @@ builder.Services.Configure<OutboxOptions>(options =>
 FlexArch.OutBox.Abstractions           # 核心抽象接口
 FlexArch.OutBox.Core                   # 核心实现
 FlexArch.OutBox.Persistence.EFCore    # EF Core持久化
-FlexArch.Outbox.Publisher.RabbitMQ    # RabbitMQ发布器
+FlexArch.OutBox.Publisher.RabbitMQ    # RabbitMQ发布器
 ```
 
 ### 中间件管道
