@@ -31,12 +31,10 @@ builder.Services
         options.EnableVerboseLogging = true;
     })
     .AddEfPersistence<OrderDbContext>()
-            .AddRabbitMqOutbox(factory =>
+    .AddRabbitMqOutbox(factory =>
     {
         factory.Uri = new Uri("amqp://admin:admin@192.168.31.220:5672/");
     })
-
-    // 添加中间件
     .WithRetry(retry =>
     {
         retry.MaxRetryCount = 3;

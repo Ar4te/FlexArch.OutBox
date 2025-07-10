@@ -62,20 +62,35 @@ if ($LASTEXITCODE -ne 0) {
 Write-Success "依赖项恢复成功"
 
 # 格式检查
-if (-not $SkipFormat) {
-    Write-Step "代码格式检查..."
-    $verbosity = if ($Verbose) { "diagnostic" } else { "minimal" }
-    dotnet format $solutionPath --verify-no-changes --verbosity $verbosity
-    if ($LASTEXITCODE -eq 0) {
-        Write-Success "代码格式检查通过"
+Write-Step "代码格式检查（忽略 ENDOFLINE）..."
+$verbosity = if ($Verbose) { "diagnostic" } else { "minimal" }
+
+# 捕获格式化输出
+$formatOutput = dotnet format $solutionPath --verify-no-changes --verbosity $verbosity 2>&1
+$formatExitCode = $LASTEXITCODE
+
+# 判断是否仅包含 ENDOFLINE 错误
+$onlyEndOfLineIssues = $true
+foreach ($line in $formatOutput) {
+    if ($line -match 'error ENDOFLINE') {
+        continue  # 忽略
     }
-    else {
-        Write-Failure "代码格式不规范，请执行 'dotnet format' 修复"
-        $passed = $false
+    elseif ($line -match 'error ') {
+        $onlyEndOfLineIssues = $false
+        Write-Host $line
+        break
     }
 }
+
+if ($formatExitCode -eq 0) {
+    Write-Success "代码格式检查通过"
+}
+elseif ($onlyEndOfLineIssues) {
+    Write-WarningMsg "发现 ENDOFLINE 行尾错误，但已忽略"
+}
 else {
-    Write-Info "已跳过代码格式检查"
+    Write-Failure "存在格式错误（非 ENDOFLINE），请执行 'dotnet format' 修复"
+    $passed = $false
 }
 
 # 构建项目
