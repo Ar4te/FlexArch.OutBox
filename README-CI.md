@@ -43,7 +43,7 @@ dotnet restore
 dotnet format --verify-no-changes
 
 # 构建项目 (警告视为错误)
-dotnet build --warningsAsErrors
+dotnet build -p:TreatWarningsAsErrors=true
 
 # 运行所有测试
 dotnet test
@@ -105,7 +105,7 @@ dotnet test
 dotnet format
 
 # 完整验证
-dotnet build --warningsAsErrors
+dotnet build -p:TreatWarningsAsErrors=true
 dotnet test
 
 # 提交
